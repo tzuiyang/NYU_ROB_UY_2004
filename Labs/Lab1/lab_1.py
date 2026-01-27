@@ -85,13 +85,15 @@ class JointStateSubscriber(Node):
 
     def print_info(self):
         """Print joint information every 2 control loops"""
-        if False:
-            if self.print_counter == 0:
-                self.get_logger().info(
-                    f"Pos: {self.joint_pos:.2f}, Target Pos: {self.target_joint_pos:.2f}, Tor: {self.calculated_torque:.2f}"
-                )
-            self.print_counter += 1
-            self.print_counter %= 2
+        if True:
+            return
+            
+        if self.print_counter == 0:
+            self.get_logger().info(
+                f"Pos: {self.joint_pos:.2f}, Target Pos: {self.target_joint_pos:.2f}, Tor: {self.calculated_torque:.2f}"
+            )
+        self.print_counter += 1
+        self.print_counter %= 2
 
     def get_joint_info(self, msg):
         """Callback function to process incoming JointState messages"""
