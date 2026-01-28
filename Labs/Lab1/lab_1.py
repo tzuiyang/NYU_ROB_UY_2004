@@ -12,9 +12,9 @@ JOINT_NAME_LEAD = "leg_front_r_3"
 
 ####
 ####
-KP = 1.8  # YOUR KP VALUE
-KI = 0.5 # YOUR KI VALUE
-KD = 0.064  # YOUR KD VALUE
+KP = 0.1  # YOUR KP VALUE
+KI = 0.1 # YOUR KI VALUE
+KD = 0.1  # YOUR KD VALUE
 ####
 ####
 LOOP_RATE = 200  # Hz
@@ -47,9 +47,9 @@ class JointStateSubscriber(Node):
         self.joint_vel_lead = 0
         self.target_joint_pos = 0
         self.target_joint_vel = 0
-        self.last_joint_error=0
-        self.sum_joint_error=0
         # self.torque_history = deque(maxlen=DELAY)
+        self.last_joint_error = 0.0
+        self.sum_joint_error = 0.0
 
         # Create a timer to run control_loop at the specified frequency
         self.create_timer(1.0 / LOOP_RATE, self.control_loop)
@@ -72,18 +72,21 @@ class JointStateSubscriber(Node):
     def calculate_torque_for_leg_tracking(self, joint_pos, joint_vel, target_joint_pos, target_joint_vel):
         ####
         #### YOUR CODE HERE
-        ####
-        torque = 0
-        torque=KP*(target_joint_pos-joint_pos)
-        #torque+=KD*(target_joint_pos-joint_pos-self.last_joint_error)
-        self.last_joint_error=target_joint_vel-joint_vel
-        torque+=KD*self.last_joint_error
-        self.sum_joint_error+=DELTA_T*self.last_joint_error
-        if self.sum_joint_error>0.3:
-            self.sum_joint_error=0.3
-        elif self.sum_joint_error<-0.3:
-            self.sum_joint_error=-0.3
-        torque+=KI*self.sum_joint_error
+        # P: proportional error
+        error = target_joint_pos - joint_pos
+
+        # D: derivative of error
+        error_derivative = (error - self.last_joint_error) / DELTA_T
+        self.last_joint_error = error
+
+        # I: integral of error (with anti-windup)
+        self.sum_joint_error += error
+        self.sum_joint_error = np.clip(self.sum_joint_error, -0.3, 0.3)
+
+        # PID torque
+        torque = KP * error + KD * error_derivative + KI * self.sum_joint_error
+
+
         # Leave this code unchanged
         if torque > 0:
             torque = max(torque, DEAD_BAND_SIZE)
@@ -93,7 +96,9 @@ class JointStateSubscriber(Node):
         return torque
 
     def print_info(self):
-        """Print joint information every 2 control loops"""            
+        """Print joint information every 2 control loops"""
+     
+            
         if self.print_counter == 0:
             self.get_logger().info(
                 f"Pos: {self.joint_pos:.2f}, Target Pos: {self.target_joint_pos:.2f}, Tor: {self.calculated_torque:.2f}"
