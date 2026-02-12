@@ -106,30 +106,37 @@ class ForwardKinematics(Node):
         )
 
     # FK for forward left leg
-    def forward_kinematics_f(self, theta1, theta2, theta3):
+    def forward_kinematics_f(self, theta1=None, theta2=None, theta3=None):
+        # If no angles are provided, use the current joint positions from the robot
+        if theta1 is None or theta2 is None or theta3 is None:
+            if self.joint_positions is None:
+                return np.array([0.0, 0.0, 0.0])
+            theta1 = self.joint_positions[0]
+            theta2 = self.joint_positions[1]
+            theta3 = self.joint_positions[2]
+
+        # Stanford Pupper V3 Dimensions
+        # Link 2 (Upper Leg) Offsets
+        l2_x, l2_y, l2_z = 0.0, -0.0494, 0.0685
+        # Link 3 (Lower Leg) Offsets
+        l3_x, l3_y, l3_z = 0.06231, 0.06216, 0.018
 
         # T_0_1 (base_link to leg_front_l_1)
         T_0_1 = self.translation(0.07500, 0.0445, 0) @ self.rotation_x(1.57080) @ self.rotation_z(theta1)
 
         # T_1_2 (leg_front_l_1 to leg_front_l_2)
-        ## TODO: Implement the transformation matrix from leg_front_l_1 to leg_front_l_2
-        # URDF: xyz=(0,0,0), rpy=(1.5708, 1.5708, -1.5708), axis z, joint theta2
         T_1_2 = self.translation(0, 0, 0) @ self.rotation_z(-1.57080) @ self.rotation_y(1.57080) @ self.rotation_x(1.57080) @ self.rotation_z(theta2)
 
         # T_2_3 (leg_front_l_2 to leg_front_l_3)
-        ## TODO: Implement the transformation matrix from leg_front_l_2 to leg_front_l_3
-        # URDF: xyz=(0, -0.0494, 0.0685), rpy=(0, 1.5708, 3.14159), axis z, joint theta3
-        T_2_3 = self.translation(0, -0.0494, 0.0685) @ self.rotation_z(3.14159) @ self.rotation_y(1.57080) @ self.rotation_z(theta3)
+        T_2_3 = self.translation(l2_x, l2_y, l2_z) @ self.rotation_z(3.14159) @ self.rotation_y(1.57080) @ self.rotation_z(theta3)
 
         # T_3_ee (leg_front_l_3 to end-effector)
-        ## TODO: Implement the transformation matrix from leg_front_l_3 to end effector
-        # URDF: foot sphere center at (0.06231, 0.06216, 0.018) relative to leg_front_l_3
-        T_3_ee = self.translation(0.06231, 0.06216, 0.018)
+        T_3_ee = self.translation(l3_x, l3_y, l3_z)
 
-        # TODO: Compute the final transformation. T_0_ee is the multiplication of the previous transformation matrices
+        # Compute the final transformation
         T_0_ee = T_0_1 @ T_1_2 @ T_2_3 @ T_3_ee
 
-        # TODO: Extract the end-effector position. The end effector position is a 3x1 vector (not in homogenous coordinates)
+        # Extract the end-effector position
         end_effector_position = T_0_ee[0:3, 3]
 
         return end_effector_position
