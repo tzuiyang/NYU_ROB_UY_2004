@@ -125,7 +125,7 @@ class ForwardKinematics(Node):
         T_0_1 = self.translation(0.07500, 0.0445, 0) @ self.rotation_x(1.57080) @ self.rotation_z(theta1)
 
         # T_1_2 (leg_front_l_1 to leg_front_l_2)
-        T_1_2 = self.translation(0, 0, 0) @ self.rotation_z(-1.57080) @ self.rotation_y(1.57080) @ self.rotation_x(1.57080) @ self.rotation_z(theta2)
+        T_1_2 = self.translation(0, 0, 0.04) @ self.rotation_z(-1.57080) @ self.rotation_y(1.57080) @ self.rotation_x(1.57080) @ self.rotation_z(theta2)
 
         # T_2_3 (leg_front_l_2 to leg_front_l_3)
         T_2_3 = self.translation(l2_x, l2_y, l2_z) @ self.rotation_z(3.14159) @ self.rotation_y(1.57080) @ self.rotation_z(theta3)
@@ -138,17 +138,50 @@ class ForwardKinematics(Node):
 
         # Extract the end-effector position
         end_effector_position = T_0_ee[0:3, 3]
+        end_effector_position[1] = -end_effector_position[1]
+        end_effector_position[2] = -end_effector_position[2]
 
         return end_effector_position
 
     # FK for back left leg
-    def forward_kinematics_b(self, theta1, theta2, theta3):
+    def forward_kinematics_b(self, theta1=None, theta2=None, theta3=None):
 
         ## TODO: Implement the FK for the back left leg, similar to forward_kinematics_f
-        end_effector_position = np.array([0,0,0])
+        # If no angles are provided, use the current joint positions from the robot
+        if theta1 is None or theta2 is None or theta3 is None:
+            if self.joint_positions is None:
+                return np.array([0.0, 0.0, 0.0])
+            theta1 = self.joint_positions[0]
+            theta2 = self.joint_positions[1]
+            theta3 = self.joint_positions[2]
+
+        # Stanford Pupper V3 Dimensions
+        # Link 2 (Upper Leg) Offsets
+        l2_x, l2_y, l2_z = 0.0, -0.0494, 0.0685
+        # Link 3 (Lower Leg) Offsets
+        l3_x, l3_y, l3_z = 0.06231, 0.06216, 0.018
+
+        # T_0_1 (base_link to leg_front_l_1)
+        T_0_1 = self.translation(-0.07500, 0.0445, 0) @ self.rotation_x(1.57080) @ self.rotation_z(theta1)
+
+        # T_1_2 (leg_front_l_1 to leg_front_l_2)
+        T_1_2 = self.translation(0, 0, 0.04) @ self.rotation_z(-1.57080) @ self.rotation_y(1.57080) @ self.rotation_x(1.57080) @ self.rotation_z(theta2)
+
+        # T_2_3 (leg_front_l_2 to leg_front_l_3)
+        T_2_3 = self.translation(l2_x, l2_y, l2_z) @ self.rotation_z(3.14159) @ self.rotation_y(1.57080) @ self.rotation_z(theta3)
+
+        # T_3_ee (leg_front_l_3 to end-effector)
+        T_3_ee = self.translation(l3_x, l3_y, l3_z)
+
+        # Compute the final transformation
+        T_0_ee = T_0_1 @ T_1_2 @ T_2_3 @ T_3_ee
+
+        # Extract the end-effector position
+        end_effector_position = T_0_ee[0:3, 3]
+        end_effector_position[1] = -end_effector_position[1]
+        end_effector_position[2] = -end_effector_position[2]
 
         return end_effector_position
-
 
     def timer_callback(self):
         """Timer callback for publishing end-effector marker and position."""
