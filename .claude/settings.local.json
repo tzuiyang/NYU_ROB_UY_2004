@@ -9,7 +9,10 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git -C \"c:\\\\Users\\\\tzuiy\\\\NYU_ROB_UY_2004\" remote -v)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)"
     ]
   }
 }
