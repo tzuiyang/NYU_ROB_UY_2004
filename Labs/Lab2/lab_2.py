@@ -1,3 +1,4 @@
+import os
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -53,8 +54,10 @@ class ForwardKinematics(Node):
         self.data_dictionary['theta3_b'].append(theta3_b)
         self.data_dictionary['end_effector_position_f'].append(end_effector_position_f)
         self.data_dictionary['end_effector_position_b'].append(end_effector_position_b)
-        with open(self.filename, 'wb') as file_handle:
+        tmp_filename = self.filename + '.tmp'
+        with open(tmp_filename, 'wb') as file_handle:
             pickle.dump(self.data_dictionary, file_handle)
+        os.replace(tmp_filename, self.filename)
 
     def publish_zero_gains(self):
         self.kp_publisher.publish(Float64MultiArray(data=[0.0] * 12))
