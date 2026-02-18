@@ -36,12 +36,28 @@ def plot_leg_path(data_dictionary):
     plt.title('End Effector trajectory')
     plt.xlabel('EE X(m)')
     plt.ylabel('EE Z(m)')
+    plt.savefig('plot_ee_trajectory.png')
     plt.show()
 
-    plt.plot(time_stamp_list,z_ee_f )
-    plt.title('End Effector Z vs Time')
+    plt.plot(time_stamp_list, z_ee_f)
+    plt.title('End Effector Z vs Time (constant Z movement)')
     plt.xlabel('Time(s)')
     plt.ylabel('EE Z (m)')
+    plt.savefig('plot_ee_z_vs_time.png')
+    plt.show()
+
+    plt.plot(time_stamp_list, x_ee_f)
+    plt.title('End Effector X vs Time (constant X movement)')
+    plt.xlabel('Time(s)')
+    plt.ylabel('EE X (m)')
+    plt.savefig('plot_ee_x_vs_time.png')
+    plt.show()
+
+    plt.plot(time_stamp_list, y_ee_f)
+    plt.title('End Effector Y vs Time (constant Y movement)')
+    plt.xlabel('Time(s)')
+    plt.ylabel('EE Y (m)')
+    plt.savefig('plot_ee_y_vs_time.png')
     plt.show()
 
 
