@@ -220,7 +220,10 @@ class ForwardKinematics(Node):
             position.data = end_effector_position_f
             self.position_publisher.publish(position)
             self.get_logger().info(
-                f"End-Effector Position: x={end_effector_position_f[0]:.2f}, y={end_effector_position_f[1]:.2f}, z={end_effector_position_f[2]:.2f}"
+                f"Front Leg EE Position: x={end_effector_position_f[0]:.2f}, y={end_effector_position_f[1]:.2f}, z={end_effector_position_f[2]:.2f}"
+            )
+            self.get_logger().info(
+                f"Back  Leg EE Position: x={end_effector_position_b[0]:.2f}, y={end_effector_position_b[1]:.2f}, z={end_effector_position_b[2]:.2f}"
             )
 
 
