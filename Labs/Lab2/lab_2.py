@@ -216,6 +216,23 @@ class ForwardKinematics(Node):
             marker.pose.position.z = end_effector_position_f[2]
             self.marker_publisher.publish(marker)
 
+            marker_b = Marker()
+            marker_b.header.frame_id = "/base_link"
+            marker_b.header.stamp = self.get_clock().now().to_msg()
+            marker_b.type = marker_b.SPHERE
+            marker_b.id = 1
+            marker_b.color.r = 0.0
+            marker_b.color.g = 1.0
+            marker_b.color.b = 0.0
+            marker_b.color.a = 1.0
+            marker_b.scale.x = 0.05
+            marker_b.scale.y = 0.05
+            marker_b.scale.z = 0.05
+            marker_b.pose.position.x = end_effector_position_b[0]
+            marker_b.pose.position.y = end_effector_position_b[1]
+            marker_b.pose.position.z = end_effector_position_b[2]
+            self.marker_publisher.publish(marker_b)
+
             position = Float64MultiArray()
             position.data = end_effector_position_f
             self.position_publisher.publish(position)
