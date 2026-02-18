@@ -119,7 +119,7 @@ class ForwardKinematics(Node):
         # Link 2 (Upper Leg) Offsets
         l2_x, l2_y, l2_z = 0.0, -0.0494, 0.0685
         # Link 3 (Lower Leg) Offsets
-        l3_x, l3_y, l3_z = 0.06231, 0.05216, 0.098
+        l3_x, l3_y, l3_z = 0.06231, 0.06216, 0.098
 
         # T_0_1 (base_link to leg_front_l_1)
         T_0_1 = self.translation(0.07500, 0.0445, 0) @ self.rotation_x(1.57080) @ self.rotation_z(theta1)
@@ -159,7 +159,7 @@ class ForwardKinematics(Node):
         # Link 2 (Upper Leg) Offsets
         l2_x, l2_y, l2_z = 0.0, -0.0494, 0.0685
         # Link 3 (Lower Leg) Offsets
-        l3_x, l3_y, l3_z = 0.06231, 0.06216, 0.018
+        l3_x, l3_y, l3_z = 0.06231, 0.06216, 0.098
 
         # T_0_1 (base_link to leg_front_l_1)
         T_0_1 = self.translation(-0.07500, 0.0445, 0) @ self.rotation_x(1.57080) @ self.rotation_z(theta1)
@@ -245,7 +245,7 @@ class ForwardKinematics(Node):
 
             # Distance between front and back left feet
             distance = np.linalg.norm(end_effector_position_f - end_effector_position_b)
-            threshold = 0.1  # meters
+            threshold = 0.07  # meter
             if distance < threshold:
                 sound.play()
                 self.get_logger().warn(f"Feet too close! Distance: {distance:.3f} m")
