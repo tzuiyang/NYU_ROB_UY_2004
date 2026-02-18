@@ -226,6 +226,13 @@ class ForwardKinematics(Node):
                 f"Back  Leg EE Position: x={-end_effector_position_b[2]:.2f}, y={end_effector_position_b[1]:.2f}, z={end_effector_position_b[0]:.2f}"
             )
 
+            # Distance between front and back left feet
+            distance = np.linalg.norm(end_effector_position_f - end_effector_position_b)
+            threshold = 0.1  # meters
+            if distance < threshold:
+                sound.play()
+                self.get_logger().warn(f"Feet too close! Distance: {distance:.3f} m")
+
 
 def main(args=None):
     rclpy.init(args=args)
