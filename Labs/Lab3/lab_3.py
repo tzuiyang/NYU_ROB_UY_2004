@@ -61,49 +61,55 @@ class InverseKinematics(Node):
         self.counter = 0
 
         # Trotting gate positions
-        ################################################################################################
-        # TODO: Implement the trotting gait
-        ################################################################################################
-            
-        touch_down_position = np.array([0,0,0])
-        stand_position_1 = np.array([0,0,0])
-        stand_position_2 = np.array([0,0,0])
-        stand_position_3 = np.array([0,0,0])
-        liftoff_position = np.array([0,0,0])
-        mid_swing_position = np.array([0,0,0])
-        
+        # Triangle: base centered at [0,0,-0.14], width=0.10m (X: -0.05 to +0.05), height=0.09m (Z: -0.14 to -0.05)
+        touch_down_position  = np.array([ 0.05,    0, -0.14])  # front of stance
+        stand_position_1     = np.array([ 0.0167,  0, -0.14])  # 1/3 across base
+        stand_position_2     = np.array([-0.0167,  0, -0.14])  # 2/3 across base
+        stand_position_3     = np.array([-0.05,    0, -0.14])  # back of stance / liftoff point
+        liftoff_position     = np.array([-0.05,    0, -0.14])  # foot lifts off ground
+        mid_swing_position   = np.array([ 0.0,     0, -0.05])  # apex of swing triangle
+
         ## trotting
-        # TODO: Implement each leg’s trajectory in the trotting gait.
+        # RF + LB (diagonal A): start at touch_down (phase 0)
+        # LF + RB (diagonal B): start at stand_position_3 (opposing phase)
         rf_ee_offset = np.array([0.06, -0.09, 0])
         rf_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
         ]) + rf_ee_offset
-        
+
         lf_ee_offset = np.array([0.06, 0.09, 0])
         lf_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
         ]) + lf_ee_offset
-        
+
         rb_ee_offset = np.array([-0.11, -0.09, 0])
         rb_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
         ]) + rb_ee_offset
-        
+
         lb_ee_offset = np.array([-0.11, 0.09, 0])
         lb_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
         ]) + lb_ee_offset
 
 
@@ -167,23 +173,26 @@ class InverseKinematics(Node):
         self.joint_velocities = np.array([msg.velocity[msg.name.index(joint)] for joint in joints_of_interest])
 
     def get_error_leg(self, theta, desired_position):
-        ################################################################################################
-        # TODO: [already done] paste lab 3 inverse kinematics here
-        ################################################################################################
-        return 0
+        current_position = self.leg_forward_kinematics(theta)
+        return np.linalg.norm(desired_position - current_position)
 
     def inverse_kinematics_single_leg(self, target_ee, leg_index, initial_guess=[0, 0, 0]):
         self.leg_forward_kinematics = self.fk_functions[leg_index]
-        ################################################################################################
-        # TODO: implement interpolation for all 4 legs here
-        ################################################################################################
-        return 0
+        result = scipy.optimize.minimize(
+            fun=self.get_error_leg,
+            x0=initial_guess,
+            args=(target_ee,)
+        )
+        return result.x
 
     def interpolate_triangle(self, t, leg_index):
-        ################################################################################################
-        # TODO: implement interpolation for all 4 legs here
-        ################################################################################################        
-        return 0
+        waypoints = self.ee_triangle_positions[leg_index]
+        n = len(waypoints)          # 6 waypoints → 6 equal segments
+        scaled = t * n              # map t in [0,1) to [0, n)
+        i = int(scaled) % n         # current waypoint index
+        frac = scaled - int(scaled) # fractional progress within segment
+        next_i = (i + 1) % n        # next waypoint (wraps around)
+        return waypoints[i] + frac * (waypoints[next_i] - waypoints[i])
 
     def cache_target_joint_positions(self):
         # Calculate and store the target joint positions for a cycle and all 4 legs
